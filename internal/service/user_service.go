@@ -9,19 +9,16 @@ import (
 )
 
 func CreateUser(conn *pgxpool.Conn, user models.User) (string, error) {
-	exists, err := repository.CheckUserExists(conn, user.Email, user.PhoneNumber)
-	if err != nil {
-		return "", err
-	}
-	if exists {
-		return "", errors.New("user with this email or phone number already exists")
-	}
-
+	err := userDataValidation(conn, user)
 	userID, err := repository.CreateUser(conn, user)
 	if err != nil {
 		return "", err
 	}
 	return userID, nil
+}
+
+func UpdateUser(conn *pgxpool.Conn, user models.User) error {
+	return repository.UpdateUser(conn, user)
 }
 
 func Login(conn *pgxpool.Pool, email, password string) (*models.User, error) {
@@ -41,4 +38,19 @@ func Login(conn *pgxpool.Pool, email, password string) (*models.User, error) {
 
 func GetUserById(conn *pgxpool.Pool, uuid string) (*models.User, error) {
 	return repository.GetUserById(conn, uuid)
+}
+
+func userDataValidation(conn *pgxpool.Conn, user models.User) error {
+	exists, err := repository.CheckUserExists(conn, user.Email, user.PhoneNumber)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return errors.New("user with this email or phone number already exists")
+	}
+	return nil
+}
+
+func ConfirmUserEmail(conn *pgxpool.Conn, userID string) error {
+	return repository.UpdateEmailVerified(conn, userID, true)
 }

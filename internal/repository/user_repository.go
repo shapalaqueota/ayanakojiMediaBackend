@@ -4,6 +4,7 @@ import (
 	"backend/internal/models"
 	"backend/internal/utils"
 	"context"
+	"errors"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 )
@@ -21,6 +22,18 @@ func CreateUser(conn *pgxpool.Conn, user models.User) (string, error) {
 		return "", err
 	}
 	return userID, nil
+}
+
+func UpdateUser(conn *pgxpool.Conn, user models.User) error {
+	query := `UPDATE "user" SET username=$1, phone_number=$2 WHERE id=$3`
+	cmdTag, err := conn.Exec(context.Background(), query, user.Username, user.PhoneNumber, user.ID)
+	if err != nil {
+		log.Printf("Failed to update user: %v", err)
+	}
+	if cmdTag.RowsAffected() != 1 {
+		return errors.New("failed to update user")
+	}
+	return nil
 }
 
 func GetUserById(conn *pgxpool.Pool, uuid string) (*models.User, error) {
@@ -52,4 +65,16 @@ func CheckUserExists(db *pgxpool.Conn, email string, phoneNumber string) (bool, 
 		return false, err
 	}
 	return exists, err
+}
+
+func UpdateEmailVerified(conn *pgxpool.Conn, userID string, verified bool) error {
+	sql := `UPDATE "user" SET email_verified = $1 WHERE id = $2`
+	cmdTag, err := conn.Exec(context.Background(), sql, verified, userID)
+	if err != nil {
+		return err
+	}
+	if cmdTag.RowsAffected() != 1 {
+		return errors.New("no user found or updated")
+	}
+	return nil
 }

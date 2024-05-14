@@ -1,18 +1,16 @@
 package api
 
 import (
+	"backend/internal/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 func Router(router *gin.Engine) {
-	router.POST("/users", Signup)
+	router.POST("/signup", Signup)
 	router.GET("/users/:id", GetUser)
 	router.POST("/login", Login)
-	//router.GET("/", func(c *gin.Context) {})
-	//router.GET("/movies", getMovies)
-	//router.GET("/search", searchMovies)
-	//router.POST("/subscriptions", createSubscription)
-	//router.GET("/subscriptions/:userId", getSubscription)
-	//router.GET("/users/:userId", getUser)
-	//router.PUT("/users/:userId", updateUser)
+	router.PUT("/users/update", middleware.TokenAuthMiddleware(), ManageAccount)
+	router.GET("/confirm_email", ConfirmEmailHandler)
+	router.POST("/send-confirmation-email", SendConfirmationEmailHandler)
+
 }

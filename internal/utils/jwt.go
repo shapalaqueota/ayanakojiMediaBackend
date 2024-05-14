@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-const secretKey = "bomboclat"
+const secretKey = "SECRET_KEY"
 
 func GenerateJWT(email, userID string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
