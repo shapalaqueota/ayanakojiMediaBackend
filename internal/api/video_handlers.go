@@ -8,6 +8,7 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"strconv"
 )
@@ -105,7 +106,12 @@ func UploadFilm(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to open file"})
 		return
 	}
-	defer fileContent.Close()
+	defer func(fileContent multipart.File) {
+		err := fileContent.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(fileContent)
 
 	fileBuffer := make([]byte, file.Size)
 	if _, err := fileContent.Read(fileBuffer); err != nil {
