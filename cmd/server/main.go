@@ -3,6 +3,7 @@ package main
 import (
 	"backend/internal/api"
 	"backend/internal/db"
+	"backend/internal/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"log"
@@ -15,6 +16,8 @@ func main() {
 
 	db.ConnectDB()
 	defer db.DB.Close()
+
+	utils.InitVKCloudService()
 
 	router := gin.Default()
 	api.Router(router)
