@@ -7,7 +7,6 @@ import (
 
 func Router(router *gin.Engine) {
 	router.POST("/signup", Signup)
-	router.GET("/users/:id", GetUser)
 	router.POST("/login", Login)
 
 	router.GET("/confirm_email", ConfirmEmailHandler)
