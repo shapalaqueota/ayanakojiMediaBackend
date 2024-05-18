@@ -25,8 +25,8 @@ func CreateUser(conn *pgxpool.Conn, user models.User) (string, error) {
 }
 
 func UpdateUser(conn *pgxpool.Conn, user models.User) error {
-	query := `UPDATE "user" SET username=$1, phone_number=$2 WHERE id=$3`
-	cmdTag, err := conn.Exec(context.Background(), query, user.Username, user.PhoneNumber, user.ID)
+	query := `UPDATE "user" SET username=$1 WHERE id=$2`
+	cmdTag, err := conn.Exec(context.Background(), query, user.Username, user.ID)
 	if err != nil {
 		log.Printf("Failed to update user: %v", err)
 	}
