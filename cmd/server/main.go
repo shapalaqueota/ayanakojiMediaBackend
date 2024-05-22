@@ -3,6 +3,7 @@ package main
 import (
 	"backend/internal/api"
 	"backend/internal/db"
+	"backend/internal/middleware"
 	"backend/internal/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -21,6 +22,9 @@ func main() {
 	utils.InitVKCloudService()
 
 	router := gin.Default()
+	router.Use(gin.Logger())   // Добавление логирования запросов
+	router.Use(gin.Recovery()) // Восстановление после паники
+	router.Use(middleware.CORSMiddleware())
 	api.Router(router)
 
 	port := os.Getenv("PORT")

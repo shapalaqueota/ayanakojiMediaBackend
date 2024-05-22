@@ -51,3 +51,16 @@ func SendConfirmationEmailHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Confirmation email sent successfully"})
 }
+
+func GenerateTokenHandler(c *gin.Context) {
+	userID := c.Param("userID")
+	email := c.Param("email")
+
+	token, err := utils.GenerateEmailConfirmationToken(email, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": token})
+}

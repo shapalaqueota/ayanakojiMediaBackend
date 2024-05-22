@@ -8,7 +8,6 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"log"
-	"mime/multipart"
 	"net/http"
 	"strconv"
 )
@@ -106,12 +105,7 @@ func UploadFilm(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to open file"})
 		return
 	}
-	defer func(fileContent multipart.File) {
-		err := fileContent.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}(fileContent)
+	defer fileContent.Close()
 
 	fileBuffer := make([]byte, file.Size)
 	if _, err := fileContent.Read(fileBuffer); err != nil {
@@ -120,7 +114,7 @@ func UploadFilm(c *gin.Context) {
 	}
 
 	title := file.Filename
-	s3Key := utils.GenerateS3Key(title)
+	s3Key := utils.GenerateS3Key(title) // Генерация ключа с расширением
 	log.Printf("Uploading file to S3 with key: %s", s3Key)
 	_, err = utils.UploadFile(s3Key, fileBuffer)
 	if err != nil {
@@ -137,8 +131,8 @@ func UploadFilm(c *gin.Context) {
 
 	film := models.Film{
 		Title:       title,
-		Description: "Description based on the title or some default text.",
-		IsSeries:    false, // Adjust this based on your needs or another form field
+		Description: "ASD",
+		IsSeries:    false,
 		S3Key:       s3Key,
 	}
 
@@ -189,7 +183,7 @@ func UploadEpisode(c *gin.Context) {
 	}
 
 	title := file.Filename
-	s3Key := utils.GenerateS3Key(title)
+	s3Key := utils.GenerateS3Key(title) // Генерация ключа с расширением
 	log.Printf("Uploading file to S3 with key: %s", s3Key)
 	_, err = utils.UploadFile(s3Key, fileBuffer)
 	if err != nil {
@@ -219,4 +213,36 @@ func UploadEpisode(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, episode)
+}
+
+func SearchFilmsHandler(c *gin.Context) {
+	query := c.Query("query")
+	if query == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Query parameter is required"})
+		return
+	}
+
+	conn, err := db.DB.Acquire(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to acquire database connection"})
+		return
+	}
+	defer conn.Release()
+
+	films, err := service.SearchFilms(conn, query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, films)
+}
+
+func GetAllFilms(c *gin.Context) {
+	films, err := service.GetAllFilms()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, films)
 }

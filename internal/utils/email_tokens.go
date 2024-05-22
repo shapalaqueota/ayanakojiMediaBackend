@@ -18,6 +18,7 @@ const (
 func GenerateEmailConfirmationToken(email, userID string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email":  email,
+		"userID": userID,
 		"action": "verifyEmail",
 		"exp":    time.Now().Add(time.Hour * 24).Unix(),
 	})
@@ -29,7 +30,7 @@ func VerifyEmailToken(tokenString string) (jwt.MapClaims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte("SECRET_KEY"), nil
+		return []byte(secretKey), nil
 	})
 	if err != nil {
 		return nil, err

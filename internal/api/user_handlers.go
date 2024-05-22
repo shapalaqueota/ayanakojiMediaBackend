@@ -7,7 +7,6 @@ import (
 	"backend/internal/utils"
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"net/http"
 )
 
@@ -94,14 +93,9 @@ func Login(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
-	uuidStr := c.Param("id")
+	userID := c.MustGet("userID").(string)
 
-	if _, err := uuid.Parse(uuidStr); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
-		return
-	}
-
-	user, err := service.GetUserById(db.DB, uuidStr) // Pass the string directly
+	user, err := service.GetUserById(db.DB, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

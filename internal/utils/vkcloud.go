@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -56,9 +57,11 @@ func testDNSResolution(bucket, region string) {
 }
 
 func GenerateS3Key(title string) string {
+	ext := filepath.Ext(title)          // Получаем расширение файла
+	name := title[:len(title)-len(ext)] // Убираем расширение для генерации уникального имени
 	h := sha1.New()
-	h.Write([]byte(title + time.Now().String()))
-	return fmt.Sprintf("%x", h.Sum(nil))
+	h.Write([]byte(name + time.Now().String()))
+	return fmt.Sprintf("%x%s", h.Sum(nil), ext) // Добавляем обратно расширение
 }
 
 func UploadFile(key string, file []byte) (string, error) {
@@ -69,10 +72,11 @@ func UploadFile(key string, file []byte) (string, error) {
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 		Body:   bytes.NewReader(file),
+		ACL:    aws.String("public-read"),
 	})
 	if err != nil {
 		log.Printf("Failed to upload file to bucket: %v", err)
-		return "", fmt.Errorf("Failed to upload file: %v", err)
+		return "", fmt.Errorf("failed to upload file: %v", err)
 	}
 	return key, nil
 }

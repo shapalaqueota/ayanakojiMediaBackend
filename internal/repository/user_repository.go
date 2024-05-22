@@ -25,8 +25,14 @@ func CreateUser(conn *pgxpool.Conn, user models.User) (string, error) {
 }
 
 func UpdateUser(conn *pgxpool.Conn, user models.User) error {
-	query := `UPDATE "user" SET username=$1 WHERE id=$2`
-	cmdTag, err := conn.Exec(context.Background(), query, user.Username, user.ID)
+
+	hashedPassword, err := utils.HashPassword(user.Password)
+	if err != nil {
+		return err
+	}
+
+	query := `UPDATE "user" SET username=$1, password=$2 WHERE id=$3`
+	cmdTag, err := conn.Exec(context.Background(), query, user.Username, hashedPassword, user.ID)
 	if err != nil {
 		log.Printf("Failed to update user: %v", err)
 	}
@@ -38,8 +44,8 @@ func UpdateUser(conn *pgxpool.Conn, user models.User) error {
 
 func GetUserById(conn *pgxpool.Pool, uuid string) (*models.User, error) {
 	var user models.User
-	query := `SELECT id, username, email, password FROM "user" WHERE id = $1`
-	err := conn.QueryRow(context.Background(), query, uuid).Scan(&user.ID, &user.Username, &user.Email, &user.Password)
+	query := `SELECT id, username, email, password, phone_number, email_verified FROM "user" WHERE id = $1`
+	err := conn.QueryRow(context.Background(), query, uuid).Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.PhoneNumber, &user.EmailVerified)
 	if err != nil {
 		return nil, err
 	}

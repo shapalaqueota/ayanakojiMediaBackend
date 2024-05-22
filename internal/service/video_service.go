@@ -46,3 +46,11 @@ func CreateFilm(conn *pgxpool.Conn, film *models.Film) error {
 func CreateEpisode(conn *pgxpool.Conn, episode *models.Episode) error {
 	return repository.CreateEpisode(conn, episode)
 }
+
+func SearchFilms(conn *pgxpool.Conn, query string) ([]models.Film, error) {
+	return repository.SearchFilms(conn, query)
+}
+
+func GetAllFilms() ([]models.Film, error) {
+	return repository.GetAllFilms()
+}
