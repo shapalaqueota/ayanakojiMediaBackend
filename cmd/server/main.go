@@ -23,8 +23,8 @@ func main() {
 	utils.InitVKCloudService()
 
 	router := gin.Default()
-	router.Use(gin.Logger())   // Добавление логирования запросов
-	router.Use(gin.Recovery()) // Восстановление после паники
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
 	router.Use(middleware.CORSMiddleware())
 	api.Router(router)
 	config.LoadConfig()
