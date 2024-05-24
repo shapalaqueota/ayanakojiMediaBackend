@@ -1,6 +1,7 @@
 package main
 
 import (
+	"backend/config"
 	"backend/internal/api"
 	"backend/internal/db"
 	"backend/internal/middleware"
@@ -26,6 +27,7 @@ func main() {
 	router.Use(gin.Recovery()) // Восстановление после паники
 	router.Use(middleware.CORSMiddleware())
 	api.Router(router)
+	config.LoadConfig()
 
 	port := os.Getenv("PORT")
 	if port == "" {
