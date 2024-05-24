@@ -12,7 +12,6 @@ func Router(router *gin.Engine) {
 	router.POST("/send-confirmation-email", SendConfirmationEmailHandler)
 	router.GET("/search", SearchFilmsHandler)
 	router.POST("/create-invoice", CreateInvoice)
-	router.GET("/invoice/:id/status", GetInvoiceStatus)
 	authorized := router.Group("/")
 	authorized.Use(middleware.TokenAuthMiddleware())
 	{
